@@ -1,0 +1,40 @@
+* {
+    margin: 0;
+    box-sizing: border-box; 
+}
+
+body {    
+    background-color: #1b2124;
+    color: #FFF;
+    & .voltar {
+        margin-top: 45px;
+        & a {
+            text-decoration: none;
+            color: #FFFFFF;
+        }
+    }
+    & .cadastroTarefa {
+        margin: 5px 150px 40px 150px;
+        & input, select {
+            margin-bottom: 20px;
+            background-color: #1b2124;
+            border-color: #939393;
+            color: #939393;
+            &::placeholder{
+                color: #939393;
+            }
+            &:focus {
+                background-color: #1b2124;
+                color: #FFF;
+            }
+            &:not(:placeholder-shown) {
+                background-color: #252e3c;
+                color: #FFF;
+            }
+        }
+        & h1 {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+    }
+}

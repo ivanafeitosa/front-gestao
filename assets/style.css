@@ -1,0 +1,48 @@
+* {
+    margin: 0;
+    box-sizing: border-box; 
+}
+
+body {
+    height: 100vh;
+    background-color: #1b2124;
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    & img {
+       width: 180px;
+       margin-bottom: 10px; 
+    }
+    & h1{
+        text-align: center;
+    }
+    & .subtitle {
+        text-align: center;
+    }
+    & .conteudo {
+        max-width: 490px;
+        min-width: 320px;
+        text-align: center;
+        
+    }
+    & button {
+        & a {
+            text-decoration: none;
+            color: #FFFFFF;
+        }    
+    }
+
+    @media (max-width: 540px) {
+        .conteudo{
+            margin-left: 10px;
+            margin-right: 10px;
+        }         
+    }
+
+}
+
+
+
