@@ -20,15 +20,17 @@
                     class="bi bi-arrow-left-short"></i></a></button>
         <div class="cadastroTarefa">
             <h1>Listas de Tarefas</h1>
-            <input type="text" class="form-control" id="inputUsuario" placeholder="Usuário responsável">
-            <input type="text" class="form-control" id="inputTarefa" placeholder="Descrição da tarefa">
-            <select name="" class="form-select" id="inputStatus">
-                <option value="Iniciado">Iniciado</option>
-                <option value="Finalizado">Finalizado</option>
-                <option value="Pendente">Pendente</option>
-                <option value="Cancelado">Cancelado</option>
-            </select>
-            <button type="button" class="btn btn-primary" id="addTarefa">Adicionar Tarefa</button>
+            <form id="tarefa-form">
+                <input type="text" class="form-control" id="nomeResponsavel" placeholder="Usuário responsável">
+                <input type="text" class="form-control" id="descricao" placeholder="Descrição da tarefa">
+                <select name="" class="form-select" id="status">
+                    <option value="Iniciado">Iniciado</option>
+                    <option value="Finalizado">Finalizado</option>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
+                <button type="submit" class="btn btn-primary" id="btnCoringa">Adicionar Tarefa</button>
+            </form>            
         </div>
         <hr>
         <div class="tarefas" id="groupTarefas">

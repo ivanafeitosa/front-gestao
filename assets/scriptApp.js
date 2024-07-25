@@ -1,140 +1,149 @@
 //Acesando o componente que conterá as tarefas
 const groupTarefas = document.getElementById("groupTarefas");
+const form = document.getElementById("tarefa-form");
 
 //Acessando os inputs do formulário
-const inputUsuario = document.getElementById('inputUsuario');
-const inputTarefa = document.getElementById('inputTarefa');
-const inputStatus = document.getElementById('inputStatus');
+const inputResponsavel = document.getElementById('nomeResponsavel');
+const inputDescricao = document.getElementById('descricao');
+const inputStatus = document.getElementById('status');
 
-//Gerando Ids únicos para cada nova tarefa
-let contadorId = 0;
-
-function obterMaiorId(tarefas) {
-    let maiorId = 0;
-    tarefas.forEach(tarefa => {
-        if (tarefa.id > maiorId) {
-            maiorId = tarefa.id;
-        }
-    });
-    return maiorId;
-}
+//Variável apoio para atualizar tarefas
+let tarefaIdParaAtualizar = null;
+let dataCriacao = null;
 
 //GET
-fetch('http://localhost:8080/tarefas')
-    .then(response => response.json())
-    .then(dados => {
-        dados.map(tarefa => {
-            let status = tarefa.status;
-            let icon = '';
+const carregarTarefas = async () => {
+    const response = await fetch('http://localhost:8080/tarefas');
+    const tarefas = await response.json();
 
-            switch (status) {
-                case 'Iniciado':
-                    icon = '<i class="bi bi-hand-thumbs-up"></i>';
-                    break;
-                case 'Finalizado':
-                    icon = '<i class="bi bi-check-lg"></i>';
-                    break;
-                case 'Pendente':
-                    icon = '<i class="bi bi-clock-history"></i>';
-                    break;
-                case 'Cancelado':
-                    icon = '<i class="bi bi-x"></i>';
-                    break;
-                default:
-                    console.log("Opção não existe!");
-            }
-            groupTarefas.innerHTML +=
+    groupTarefas.innerHTML = "";
+
+    tarefas.map((tarefa) => {
+        let status = tarefa.status;
+        let icon = '';
+
+        switch (status) {
+            case 'Iniciado':
+                icon = '<i class="bi bi-hand-thumbs-up"></i>';
+                break;
+            case 'Finalizado':
+                icon = '<i class="bi bi-check-lg"></i>';
+                break;
+            case 'Pendente':
+                icon = '<i class="bi bi-clock-history"></i>';
+                break;
+            case 'Cancelado':
+                icon = '<i class="bi bi-x"></i>';
+                break;
+            default:
+                console.log("Opção não existe!");
+        }
+        groupTarefas.innerHTML +=
                 `
             <div class="card text-center bg-dark text-white mt-5">
                 <div class="card-header">
                   Tarefa #${tarefa.id}
                 </div>
                 <div class="card-body">
-                  <h5 class="card-title">${tarefa.nome}</h5>
+                  <h5 class="card-title">${tarefa.nomeResponsavel}</h5>
                   <p class="card-text">${tarefa.descricao}</p>
                   <div class="buttonGroup">
-                    <button type="button" class="btn btn-success" onclick="alteraTarefa(${tarefa.id},'Finalizado')">Concluir</button>
-                    <button type="button" class="btn btn-warning" onclick="alteraTarefa(${tarefa.id},'Cancelado')">Cancelar</button>
-                    <button type="button" class="btn btn-danger" onclick="deleteTarefa(${tarefa.id})">Fechar</button>
+                    <button type="button" class="btn btn-success" onclick="alteraStatusTarefa(${tarefa.id},'Finalizado')">Concluir</button>
+                    <button type="button" class="btn btn-secondary" onclick="prepararAtualizacaoTarefa(${tarefa.id})">Atualizar</button>
+                    <button type="button" class="btn btn-warning" onclick="alteraStatusTarefa(${tarefa.id},'Cancelado')">Cancelar</button>
+                    <button type="button" class="btn btn-danger" onclick="deletarTarefa(${tarefa.id})">Fechar</button>
                   </div>
                   <p class="card-text mt-2">Status: ${tarefa.status} ${icon}</p>
                 </div>
                 <div class="card-footer">
-                  ${tarefa.data}
+                  ${tarefa.dataCriacao}
                 </div>
             </div>
             `
-        });
-        contadorId = obterMaiorId(dados);
     });
+};
 
+//POST e PUT
+const prepararAtualizacaoTarefa = async (id) => {
+    const response = await fetch(`http://localhost:8080/tarefas/${id}`);
+    const tarefa = await response.json();
 
-// POST
-document.getElementById('addTarefa').addEventListener('click', () => {
-    let dataHoraAtual = new Date();
-    let dataHoraFormatada = dataHoraAtual.toLocaleString();
+    inputResponsavel.value = tarefa.nomeResponsavel;
+    inputDescricao.value = tarefa.descricao;
+    inputStatus.value = tarefa.status;
 
-    contadorId++;
+    document.getElementById("btnCoringa").innerText = "Atualizar Tarefa";
 
-    const novaTarefa = {
-        id: parseInt(contadorId),
-        nome: inputUsuario.value,
-        descricao: inputTarefa.value,
-        status: inputStatus.value,
-        data: dataHoraFormatada
+    tarefaIdParaAtualizar = id;
+    dataCriacao = tarefa.dataCriacao;
+}
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if(tarefaIdParaAtualizar) {
+        await fetch(`http://localhost:8080/tarefas/${tarefaIdParaAtualizar}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                nomeResponsavel: inputResponsavel.value,
+                descricao: inputDescricao.value,
+                status: inputStatus.value,
+                dataCriacao,
+            }),
+        });
+        tarefaIdParaAtualizar = null;
+        dataCriacao = null;
+        document.getElementById("btnCoringa").innerText = "Adicionar Tarefa";
+    } else {
+        await fetch('http://localhost:8080/tarefas', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                nomeResponsavel: inputResponsavel.value,
+                descricao: inputDescricao.value,
+                status: inputStatus.value,
+                dataCriacao: new Date().toISOString() 
+            }),
+        });
+        alert("Tarefa cadastrada com sucesso!");
     }
 
-    fetch(`http://localhost:8080/tarefas`, {
-        method: 'POST',
-        headers: {
-            'Content-type': 'application/json'
-        },
-        body: JSON.stringify(novaTarefa)
-    })
-        .then(response => response.json())
-        .then(dados => {
-            // alert('Produto cadastrado com sucesso');
-            location.reload();
-        });
+    carregarTarefas();
+    form.reset();
 });
 
+//Alterar status
+const alteraStatusTarefa = async (id, status) => {
+    const response = await fetch(`http://localhost:8080/tarefas/${id}`);
+    const tarefa = await response.json();
+    tarefa.status = status;
 
-// PUT
-const alteraTarefa = async (id, status) => {
-    let tarefaAlterada;
-
-    await fetch(`http://localhost:8080/tarefas/${id}`)
-        .then(response => response.json())
-        .then(dado => {
-            dado.status = status;
-            tarefaAlterada = dado;
-        });
-
-    fetch(`http://localhost:8080/tarefas/${id}`, {
+    const responsePUT = await fetch(`http://localhost:8080/tarefas/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(tarefaAlterada),
-    })
-        .then(response => response.json())
-        .then(dados => {
-            // alert('Produto alterado com sucesso!');
-            location.reload();
-        });
-};
+        body: JSON.stringify(tarefa),
+    });
+    location.reload();
+}
 
 //DELETE
-const deleteTarefa = (id) => {
+const deletarTarefa = async (id) => {
     const confirma = confirm("Você tem certeza que deseja excluir este item?");
-    if (confirma) {
-        fetch(`http://localhost:8080/tarefas/${id}`, {
-            method: 'DELETE'
-        })
-            .then(response => response.json())
-            .then(dados => {
-                alert('Produto deletado com sucesso!');
-                location.reload();
-            })
+    if(confirma) {
+        await fetch(`http://localhost:8080/tarefas/${id}`, {
+            method: "DELETE",
+        });
+        alert("Produto deletado com sucesso!");
+        location.reload();
     };
 };
+
+carregarTarefas();
+
